@@ -1,0 +1,286 @@
+@startuml
+package "Мобильное приложение" as A {
+class LecturePlayer {
+  - currentLecture: Lecture
+  - isPlaying: Boolean
+  - currentTime: Time
+  + play(lectureId: ID): void
+  + pause(): void
+  + seekTo(timestamp: Time): void
+  + getCurrentTime(): Time
+  + getDuration(): Time
+}
+
+class NoteManager {
+  - noteMark: NoteMark
+  + createNote(lectureId: int, content: String, timestamp: Time): Note
+  + getNotes(lectureId: int): List<Note>
+  + updateNote(noteId: int, content: String): Note
+  + deleteNote(noteId: int): void
+}
+
+class ProblemMarker {
+  - problemMark: ProblemMark
+  + markProblemArea(lectureId: int, timestamp: Time, description: String): ProblemMark
+  + getProblemMarks(lectureId: int): List<ProblemMark>
+  + resolveProblemMark(markId: int): void
+}
+
+class LectureBrowser {
+  - lecture: Lecture
+  + searchLectures(query: String): List<Lecture>
+  + getLectureDetails(lectureId: int): Lecture
+  + getUserLectures(userId: int): List<Lecture>
+  + filterLectures(criteria: FilterCriteria): List<Lecture>
+}
+
+class AudioRecorder {
+  - isRecording: Boolean
+  - currentRecording: AudioRecording
+  + startRecording(): void
+  + stopRecording(): AudioRecording
+  + pauseRecording(): void
+  + resumeRecording(): void
+}
+
+interface SearchSystem {
+  + findById(lectureId: int): Lecture
+  + findByTeacher(teacherId: int): List<Lecture>
+  + search(query: String): List<Lecture>
+}
+
+interface MainMenu {
+  + LectureRecord(): void
+  + LectureBrowse(): void
+  + Autenfication(): void
+}
+
+LecturePlayer --> SearchSystem
+NoteManager --> SearchSystem
+ProblemMarker --> SearchSystem
+LectureBrowser --> SearchSystem
+SearchSystem --> MainMenu
+AudioRecorder --> MainMenu
+}
+
+package "Система аутенфикации" as C {
+
+class AuthenticationManager {
+  - userRepository: UserRepository
+  - passwordEncoder: PasswordEncoder
+  - tokenProvider: TokenProvider
+  + authenticate(credentials: LoginCredentials): AuthResult
+  + validateToken(token: String): TokenValidationResult
+  + refreshToken(refreshToken: String): AuthResult
+}
+
+class RegistrationService {
+  - userRepository: UserRepository
+  - passwordEncoder: PasswordEncoder
+  - emailValidator: EmailValidator
+  + register(userData: UserRegistration): RegistrationResult
+  + validateRegistration(data: UserRegistration): ValidationResult
+}
+
+class UserRepository {
+  - userList: List<User>
+  + addUser(user: User) : void
+  + deleteUser(userID: int): void
+  + showUser(userID: int): void
+}
+
+class User {
+  - UID: int
+  - Name: string
+  - Surname: string
+  - Role: Role
+  - Password: string
+  - Email: string
+  + ShowData() : string
+  + ChangeName(newName: string) : void
+  + ChangeSurname(newSurname: string) : void
+  + ChangePassword(newPassword: string) : void
+  + ChangeEmail(newEmail: string) : void
+}
+class TokenProvider {
+  - secretKey: String
+  - tokenExpiry: Duration
+  - refreshTokenExpiry: Duration
+  + generateToken(user: User): AuthToken
+  + validateToken(token: String): TokenPayload
+  + refreshToken(token: String): AuthToken
+}
+
+class PasswordEncoder {
+  + encode(password: String): String
+  + matches(password: String, encodedPassword: String): Boolean
+}
+
+class EmailValidator {
+  + isValid(email: String): Boolean
+  + isDomainAllowed(email: String): Boolean
+}
+
+interface Autenfication {
+  + loginUser(UID: string. password: String): Boolean
+  + logout(): void
+  + registr(Email: string, UID: string, password: String): void
+}
+
+AuthenticationManager --> PasswordEncoder
+AuthenticationManager --> TokenProvider
+RegistrationService --> PasswordEncoder
+RegistrationService --> EmailValidator
+RegistrationService --> Autenfication
+User --> UserRepository
+UserRepository --> AuthenticationManager
+UserRepository --> RegistrationService
+}
+
+package "Каталог записей" as B{
+class LectureService {
+  - Lecture: Lecture
+  + createLecture(lectureData: LectureData): Lecture
+  + updateLecture(lectureId: int, updates: LectureUpdate): Lecture
+  + deleteLecture(lectureId: int): void
+  + getLecture(lectureId: int): Lecture
+}
+
+class LectureHandler{
+  - Lecture: Lecture
+  + getText(Audio: audiorecord): string
+  + getConspect (Text: string): string
+}
+
+class Lecture{
+  -ID: int
+  -Name: string
+  -AudioRecord: string
+  -Text: string
+  -Conspect: string
+  -Notes: List<NoteMark>
+  -ProblemMark: List<ProblemMark>
+  +getLecture(lectureID: int): Lecture
+  +deleteLecture(lectureID: int): void
+}
+
+class NoteMark{
+  -ID: int
+  -Timestamp: time
+  -TimeLen: float
+  -Text: string
+  +getText(NoteID: int): string
+  +deleteNote(NoteID: int): void
+}
+
+class ProblemMark{
+  -ID: int
+  -Timestamp: time
+  -TimeLen: float
+  -Text: string
+  +getText(ProblemMarkID: int): string
+  +deleteNote(ProblemMarkID: int): void
+}
+
+class SearchService {
+  - indexer: TextIndexer
+  + search(query: SearchQuery): SearchResult<Lecture>
+  + advancedSearch(criteria: AdvancedSearchCriteria): SearchResult<Lecture>
+  + suggestKeywords(query: String): List<String>
+}
+
+class DBconnection {
+  - storagePath: String
+  + storeLecture(string: Lecture): void
+  + getLecture(filepath: String): void
+  + deleteLecture(filepath: String): void
+}
+
+class TextIndexer {
+  + indexLecture(lecture: Lecture): void
+  + removeFromIndex(lectureId: int): void
+  + searchIndex(query: String): List<SearchDocument>
+}
+
+class PermissionChecker {
+  - authService: AuthService
+  + canViewLecture(userId: int, lectureId: int): Boolean
+  + canEditLecture(userId: int, lectureId: int): Boolean
+  + canDeleteLecture(userId: int, lectureId: int): Boolean
+}
+
+LectureService --> DBconnection
+SearchService --> TextIndexer
+LectureHandler --> LectureService
+ProblemMark --> Lecture
+NoteMark --> Lecture
+Lecture --> LectureService
+}
+
+
+package "Система API" as D{
+class RequestRouter {
+  - routeTable: Map<String, ServiceEndpoint>
+  - loadBalancer: LoadBalancer
+  + route(request: APIRequest): ServiceEndpoint
+  + addRoute(path: String, endpoint: ServiceEndpoint): void
+  + removeRoute(path: String): void
+}
+
+class AuthenticationFilter {
+  - tokenValidator: TokenValidator
+  + filter(request: APIRequest): FilterResult
+  + extractToken(request: APIRequest): String
+  + validateToken(token: String): Boolean
+}
+
+class RequestValidator {
+  - schemaRegistry: SchemaRegistry
+  + validate(request: APIRequest): ValidationResult
+  + validateBody(schema: String, body: String): ValidationResult
+  + validateHeaders(headers: Map<String, String>): ValidationResult
+}
+
+class ResponseProcessor {
+  - transformers: List<ResponseTransformer>
+  + process(response: ServiceResponse): APIResponse
+  + transformBody(body: Object, format: ResponseFormat): String
+  + addHeaders(response: APIResponse, headers: Map<String, String>): void
+}
+
+class ErrorHandler {
+  - errorMappings: Map<ErrorCode, ErrorResponse>
+  + handleException(exception: Exception): ErrorResponse
+  + mapError(error: ServiceError): APIError
+  + logError(error: Exception): void
+}
+
+interface ServiceEndpoint {
+  + getUrl(): String
+  + getHealth(): HealthStatus
+  + invoke(request: ServiceRequest): ServiceResponse
+}
+
+RequestRouter --> ServiceEndpoint
+AuthenticationFilter --> ServiceEndpoint
+RequestValidator --> ServiceEndpoint
+ResponseProcessor --> ServiceEndpoint
+ErrorHandler --> ServiceEndpoint
+}
+
+Autenfication --> MainMenu
+LectureService --> LecturePlayer
+LectureService --> LectureBrowser
+LectureService -down-> ProblemMarker
+LectureService -down-> NoteManager
+LectureHandler <-- ServiceEndpoint
+
+
+A -[hidden]down- B
+A -[hidden]right- C
+C -[hidden]up- D
+A -[hidden]down- D
+ServiceEndpoint -[hidden]down- LectureService
+LectureService -[hidden]down- LecturePlayer
+LectureService -[hidden]down- LectureBrowser
+@enduml
