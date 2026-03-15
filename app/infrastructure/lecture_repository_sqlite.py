@@ -9,7 +9,7 @@ from .db_interface import DatabaseInterface
 
 
 class LectureRepositorySqlite(LectureRepository):
-    """Реализация LectureRepository поверх таблицы lectures в SQLite."""
+    """Реализация LectureRepository поверх таблицы nc_9ivt__Лекции в SQLite."""
 
     def __init__(self, db: DatabaseInterface) -> None:
         self._db = db
@@ -19,16 +19,16 @@ class LectureRepositorySqlite(LectureRepository):
         """Преобразует строку БД (dict) в доменную модель Lecture."""
         return Lecture(
             id=int(row["id"]),
-            title=str(row.get("title", "")),
-            audio_record_url=row.get("audio_record_url"),
-            text=row.get("text"),
-            conspect_url=row.get("conspect_url"),
+            title=str(row.get("Тема_лекции", "")),
+            audio_record_url=None,
+            text=None,
+            conspect_url=None,
         )
 
     def get_lecture(self, lecture_id: int) -> Lecture:
         sql = """
-        SELECT id, title, audio_record_url, text, conspect_url
-        FROM lectures
+        SELECT id, "Тема_лекции"
+        FROM "nc_9ivt___Лекции"
         WHERE id = ?
         """
         row = self._db.fetch_one(sql, (lecture_id,))
@@ -38,9 +38,9 @@ class LectureRepositorySqlite(LectureRepository):
 
     def list_lectures_by_date(self, lecture_date: date) -> List[Lecture]:
         sql = """
-        SELECT id, title, audio_record_url, text, conspect_url
-        FROM lectures
-        WHERE lecture_date = ?
+        SELECT id, "Тема_лекции"
+        FROM "nc_9ivt___Лекции"
+        WHERE "Дата_проведения" = ?
         ORDER BY id
         """
         rows = self._db.fetch_all(sql, (lecture_date.isoformat(),))

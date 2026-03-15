@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    image: lecture-app
+    container_name: lecture-app
+    environment:
+      - APP_SQLITE_PATH=/data/noco.db
+    working_dir: /app
+    volumes:
+      - ./data:/data
+    tty: true
+    stdin_open: true
+    command: ["python", "-m", "app.ui_cli"]
+
