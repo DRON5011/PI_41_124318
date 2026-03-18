@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  dash-app:
+    build: .
+    container_name: dash-nocodb-app
+    ports:
+      - "8050:8050"
+    environment:
+      - NOCODB_URL=http://host.docker.internal:8080
+      - NOCODB_TOKEN=h070wPAEcnvRUrqeXswZu-LP7HZqnqZCo5PQudOg
+      - NOCODB_TABLE=Lections
+      - TABLE_ID=m4i2yylgaqvy4m5
+      - DATE_FIELD=lection_date
+      - DEBUG_MODE=True
+    restart: unless-stopped
