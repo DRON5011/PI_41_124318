@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "VKR Database",
+            "Group": "Servers",
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "vkr_database",
+            "Username": "vkr_user",
+            "SSLMode": "prefer",
+            "PassFile": "/pgpass"
+        }
+    }
+}

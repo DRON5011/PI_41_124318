@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:18.3-bookworm
+    container_name: VKR_DatabaseStartup
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: VKR_Database
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 22082004
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5433:5433"
+    volumes:
+      - vkr_postgres_data:/var/lib/postgresql
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    networks:
+      - vkr_network
+
+networks:
+  vkr_network:
+    driver: bridge
+
+volumes:
+  vkr_postgres_data:
+    name: vkr_postgres_data

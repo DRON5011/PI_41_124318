@@ -14,11 +14,11 @@ import plotly.express as px
 # Конфигурация из переменных окружения
 # =========================
 
-NOCODB_URL: str = os.getenv("NOCODB_URL", "http://host.docker.internal:8080").rstrip('/')
+NOCODB_URL: str = os.getenv("NOCODB_URL", "").rstrip('/')
 NOCODB_TOKEN: Optional[str] = os.getenv("NOCODB_TOKEN", "")
-NOCODB_TABLE: str = os.getenv("NOCODB_TABLE", "Lections")
-DATE_FIELD: str = os.getenv("DATE_FIELD", "lection_date")
-TABLE_ID: Optional[str] = os.getenv("TABLE_ID", "m4i2yylgaqvy4m5")  # Правильный ID
+NOCODB_TABLE: str = os.getenv("NOCODB_TABLE", "")
+DATE_FIELD: str = os.getenv("DATE_FIELD", "")
+TABLE_ID: Optional[str] = os.getenv("TABLE_ID", "")
 API_TIMEOUT: int = int(os.getenv("API_TIMEOUT", "30"))
 PAGE_SIZE: int = int(os.getenv("PAGE_SIZE", "100"))
 DEBUG_MODE: bool = os.getenv("DEBUG_MODE", "False").lower() == "true"
