@@ -1,0 +1,198 @@
+@startuml
+    class User {
+        <<abstract>>
+        -UUID id
+        -String fio
+        -String email
+        -String password
+        +login()
+        +logout()
+        +updateProfile()
+    }
+    
+    class Student {
+        +List~ProblemMark~ problemMarks
+        +addProblemMark()
+        +removeProblemMark()
+        +getProblemMarksByRecord()
+    }
+    
+    class Teacher {
+        +List~Lection~ lections
+        +List~Metaphor~ metaphors
+        +addLection()
+        +removeLection()
+        +addMetaphor()
+        +removeMetaphor()
+        +getLectionsByCourse()
+    }
+    
+    class LectionManager {
+        -List~Lection~ lections
+        +addLection(Lection)
+        +removeLection(UUID)
+        +updateLection(Lection)
+        +getLectionById(UUID) Lection
+        +getAllLections() List~Lection~
+        +getLectionsByTeacher(UUID) List~Lection~
+        +getLectionsByCourse(String) List~Lection~
+        +getLectionsByDate(Date) List~Lection~
+        +getLectionsByStatus(LectionStatus) List~Lection~
+    }
+    
+    class ProblemMarkManager {
+        -List~ProblemMark~ problemMarks
+        +addProblemMark(ProblemMark)
+        +removeProblemMark(UUID)
+        +updateProblemMark(ProblemMark)
+        +getProblemMarkById(UUID) ProblemMark
+        +getAllProblemMarks() List~ProblemMark~
+        +getProblemMarksByStudent(UUID) List~ProblemMark~
+        +getProblemMarksByRecord(UUID) List~ProblemMark~
+    }
+    
+    class MetaphorManager {
+        -List~Metaphor~ metaphors
+        +addMetaphor(Metaphor)
+        +removeMetaphor(UUID)
+        +updateMetaphor(Metaphor)
+        +getMetaphorById(UUID) Metaphor
+        +getAllMetaphors() List~Metaphor~
+        +getMetaphorsByTeacher(UUID) List~Metaphor~
+        +getMetaphorsByLection(UUID) List~Metaphor~
+    }
+    
+    class RecordManager {
+        -List~Record~ records
+        +addRecord(Record)
+        +removeRecord(UUID)
+        +updateRecord(Record)
+        +getRecordById(UUID) Record
+        +getAllRecords() List~Record~
+        +getRecordsByLection(UUID) List~Record~
+        +getRecordsByStatus(RecordStatus) List~Record~
+        +requestTranscription(UUID, TimeInterval)
+        +requestSummary(UUID)
+        +getTranscriptionStatus(UUID) RecordStatus
+        +getSummaryStatus(UUID) RecordStatus
+    }
+
+    class Lection {
+        -UUID id
+        -String nameLection
+        -String courseLection
+        -Date date
+        -Time startTime
+        -Time endTime
+        -LectionStatus status
+        -Teacher teacher
+        -Record record
+        +updateDetails()
+        +changeStatus(LectionStatus)
+        +getDuration()
+        +isActive()
+        +cancel()
+        +complete()
+    }
+    
+    class Record {
+        -UUID id
+        -String shortName
+        -String urlRecord
+        -String urlText
+        -String urlConspect
+        -RecordStatus status
+        -Lection lection
+        -List~ProblemMark~ problemMarks
+        -List~Metaphor~ metaphors
+        +addProblemMark(ProblemMark)
+        +removeProblemMark(ProblemMark)
+        +addMetaphor(Metaphor)
+        +removeMetaphor(Metaphor)
+        +updateTranscription(String)
+        +updateConspect(String)
+        +getTranscriptionStatus()
+        +getConspectStatus()
+        +markAsProcessed()
+        +markAsSummarized()
+    }
+    
+    class ProblemMark {
+        -UUID id
+        -String shortName
+        -String desc
+        -Time time
+        -Student student
+        -Record record
+        +updateDescription()
+        +updateTime()
+    }
+    
+    class Metaphor {
+        -UUID id
+        -String shortName
+        -String desc
+        -Time timeStart
+        -Time timeEnd
+        -Teacher teacher
+        -Lection lection
+        +updateDescription()
+        +updateTimeRange()
+        +getDuration()
+    }
+    
+    class LectionStatus {
+        <<enumeration>>
+        +ЗАПЛАНИРОВАНА
+        +ПРОВЕДЕНА
+        +ОТМЕНЕНА
+    }
+    
+    class RecordStatus {
+        <<enumeration>>
+        +НЕОБРАБОТАНА
+        +ОБРАБОТАНА
+        +КОНСПЕКТ
+    }
+    
+    User <|-- Student
+    User <|-- Teacher
+    
+    Student "1" --> "*" ProblemMark : has
+    Teacher "1" --> "*" Lection : conducts
+    Teacher "1" --> "*" Metaphor : creates
+    
+    LectionManager --> Lection : manages
+    ProblemMarkManager --> ProblemMark : manages
+    MetaphorManager --> Metaphor : manages
+    RecordManager --> Record : manages
+    
+    Lection "1" --> "1" Teacher : taught by
+    Lection "1" --> "1" Record : has
+    
+    Record "1" --> "*" ProblemMark : contains
+    Record "1" --> "*" Metaphor : contains
+    
+    ProblemMark "*" --> "1" Student : created by
+    ProblemMark "*" --> "1" Record : belongs to
+    
+    Metaphor "*" --> "1" Teacher : created by
+    Metaphor "*" --> "1" Lection : belongs to
+    
+    Lection --> LectionStatus : has
+    Record --> RecordStatus : has
+    
+    class IManager {
+        <<interface>>
+        +add()
+        +remove()
+        +update()
+        +getById()
+        +getAll()
+    }
+    
+    IManager <|.. LectionManager
+    IManager <|.. ProblemMarkManager
+    IManager <|.. MetaphorManager
+    IManager <|.. RecordManager
+@enduml

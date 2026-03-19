@@ -1,0 +1,62 @@
+services:
+  locust-master-web:
+    image: locustio/locust:latest
+    container_name: locust-master-web
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./locust:/locust
+      - ./locust-reports:/reports
+    working_dir: /locust
+    command: -f locustfile.py --master -H http://host.docker.internal:8080 --web-port 8089
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  locust-worker-1:
+    image: locustio/locust:latest
+    container_name: locust-worker-1
+    volumes:
+      - ./locust:/locust
+      - ./locust-reports:/reports
+    working_dir: /locust
+    command: -f locustfile.py --worker --master-host locust-master-web
+    depends_on:
+      - locust-master-web
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  locust-worker-2:
+    image: locustio/locust:latest
+    container_name: locust-worker-2
+    volumes:
+      - ./locust:/locust
+      - ./locust-reports:/reports
+    working_dir: /locust
+    command: -f locustfile.py --worker --master-host locust-master-web
+    depends_on:
+      - locust-master-web
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  locust-headless:
+    image: locustio/locust:latest
+    container_name: locust-headless
+    volumes:
+      - ./locust:/locust
+      - locust_reports:/reports
+    working_dir: /locust
+    user: "0:0"
+    environment:
+      - TZ=Europe/Moscow
+      - HOME=/tmp
+    command: -f locustfile.py --headless -u 50 -r 5 --run-time 2m --host=http://host.docker.internal:8080 --csv=/reports/headless
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  locust_reports:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./locust-reports

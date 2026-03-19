@@ -1,0 +1,139 @@
+C4Component
+title C3 Diagram - Lecture Support System (Complete View)
+
+Person(student, "Student", "Listens to lectures and creates notes")
+Person(teacher, "Teacher", "Conducts lectures and manages content")
+
+System_Ext(speechToText, "Speech-to-Text System", "Converts audio to text")
+System_Ext(summarySystem, "Summary System", "Generates text summaries")
+
+Container_Boundary(mobileApp, "Mobile Application (iOS/Swift)") {
+    Component(mobileMainUI, "MainUI", "SwiftUI", "Main navigation with tabs")
+    Component(mobileAuthUI, "AuthUI", "SwiftUI", "Login/Registration screens")
+    Component(mobilePlayerUI, "PlayerUI", "AVFoundation", "Audio player with controls")
+    Component(mobileNotesUI, "NotesUI", "SwiftUI", "Note management interface")
+    Component(mobileRecorderUI, "RecorderUI", "AVFoundation", "Lecture recorder")
+    Component(mobileSearchUI, "SearchUI", "SwiftUI", "Lecture search interface")
+    Component(mobileAPIClient, "APIClient", "URLSession", "HTTP client for API")
+    Component(mobileLocalDB, "LocalDatabase", "CoreData", "Offline storage")
+    Component(mobileSync, "SyncManager", "Swift", "Offline synchronization")
+}
+
+Container_Boundary(loadBalancer, "Load Balancer (Nginx)") {
+    Component(lbCore, "NginxCore", "Nginx", "Round-robin load balancing")
+    Component(lbHealth, "HealthCheck", "Nginx", "Server health monitoring")
+    Component(lbRate, "RateLimiter", "Nginx", "IP-based rate limiting")
+    Component(lbSSL, "SSLTerminator", "Nginx", "SSL/TLS termination")
+}
+
+Container_Boundary(authService, "Authentication Service (Python/Django)") {
+    Component(authController, "AuthController", "Django REST", "/auth/* endpoints")
+    Component(tokenController, "TokenController", "Django", "JWT token management")
+    Component(authManager, "AuthManager", "Django", "Core authentication logic")
+    Component(passwordEncoder, "PasswordEncoder", "Django", "Password hashing")
+    Component(userRepo, "UserRepository", "Django ORM", "User data access")
+    Component(roleManager, "RoleManager", "Django", "Role management")
+    Component(authMiddleware, "AuthMiddleware", "Django", "Global JWT filter")
+}
+
+Container_Boundary(apiService, "API Service (Django REST)") {
+    Component(apiGateway, "APIGateway", "Django", "Single entry point")
+    Component(lectureController, "LectureController", "Django", "Lecture CRUD")
+    Component(noteController, "NoteController", "Django", "Note CRUD")
+    Component(fileController, "FileController", "Django", "File upload/download")
+    Component(searchController, "SearchController", "Django", "Lecture search")
+    Component(apiAuthFilter, "AuthFilter", "Django", "JWT validation")
+    Component(apiValidator, "RequestValidator", "Django", "Request validation")
+    Component(apiLogging, "LoggingMiddleware", "Django", "Request logging")
+}
+
+Container_Boundary(catalogService, "Catalog Service (Django ORM)") {
+    Component(lectureRepo, "LectureRepository", "Django ORM", "Lecture CRUD")
+    Component(noteRepo, "NoteRepository", "Django ORM", "Note CRUD")
+    Component(fileRepo, "FileRepository", "Django ORM", "File metadata")
+    Component(redisCache, "RedisCache", "Redis", "Query caching")
+    Component(searchEngine, "SearchEngine", "PostgreSQL", "Full-text search")
+    Component(transcriptionService, "TranscriptionService", "Django", "STT client")
+    Component(summaryService, "SummaryService", "Django", "Summary client")
+}
+
+Container_Boundary(database, "Database (PostgreSQL 17)") {
+    Component(dbLectures, "Lectures", "Table", "id, title, audio_url, teacher_id")
+    Component(dbNotes, "Notes", "Table", "id, content, timestamp, user_id, lecture_id")
+    Component(dbUsers, "Users", "Table", "id, email, password_hash, role")
+    Component(dbMarks, "ProblemMarks", "Table", "id, position, comment, lecture_id")
+    Component(dbFiles, "Files", "Table", "id, filename, path, size, lecture_id")
+    Component(idxSearch, "GIN Indexes", "Index", "Full-text search indexes")
+    Component(idxUsers, "BTREE Indexes", "Index", "User lookup indexes")
+    Component(triggerUpdate, "Update Timestamp", "Trigger", "Auto-updates timestamps")
+}
+
+Container_Boundary(fileStorage, "File Storage") {
+    Component(audioStore, "AudioStorage", "File System", ".m4a/.mp3 files")
+    Component(tempStore, "TempStorage", "File System", "Temporary files")
+    Component(backupStore, "BackupStorage", "File System", "Backups")
+    Component(fileManager, "FileManager", "Service", "File management")
+}
+
+Rel(student, mobileMainUI, "Uses", "HTTPS")
+Rel(teacher, mobileMainUI, "Uses", "HTTPS")
+
+Rel(mobileMainUI, mobileAuthUI, "Navigates to", "")
+Rel(mobileMainUI, mobilePlayerUI, "Opens player", "")
+Rel(mobileMainUI, mobileNotesUI, "Opens notes", "")
+Rel(mobileMainUI, mobileRecorderUI, "Starts recording", "")
+Rel(mobileMainUI, mobileSearchUI, "Opens search", "")
+
+Rel(mobileAuthUI, mobileAPIClient, "Sends credentials", "")
+Rel(mobilePlayerUI, mobileAPIClient, "Requests audio", "")
+Rel(mobileNotesUI, mobileAPIClient, "Saves notes", "")
+Rel(mobileRecorderUI, mobileAPIClient, "Uploads recording", "")
+Rel(mobileSearchUI, mobileAPIClient, "Performs search", "")
+Rel(mobileSync, mobileLocalDB, "Syncs data", "")
+Rel(mobileAPIClient, mobileSync, "Manages offline", "")
+
+Rel(mobileAPIClient, lbCore, "API requests", "HTTPS")
+Rel(lbCore, lbRate, "Checks rate limit", "")
+Rel(lbCore, lbSSL, "Terminates SSL", "")
+Rel(lbCore, lbHealth, "Monitors health", "")
+Rel(lbCore, apiGateway, "Balances traffic", "HTTP")
+
+Rel(apiGateway, apiAuthFilter, "Passes through filter", "")
+Rel(apiAuthFilter, authMiddleware, "Validates token", "gRPC/HTTP")
+Rel(authMiddleware, authController, "Auth routes", "")
+Rel(authMiddleware, lectureController, "Lecture routes", "")
+Rel(authMiddleware, noteController, "Note routes", "")
+Rel(authMiddleware, fileController, "File routes", "")
+Rel(authMiddleware, searchController, "Search routes", "")
+
+Rel(authController, authManager, "Delegates auth", "")
+Rel(authManager, passwordEncoder, "Verifies password", "")
+Rel(authManager, roleManager, "Checks role", "")
+Rel(tokenController, userRepo, "Finds user", "")
+Rel(userRepo, dbUsers, "Accesses", "SQL")
+
+Rel(lectureController, lectureRepo, "CRUD operations", "")
+Rel(noteController, noteRepo, "CRUD operations", "")
+Rel(fileController, fileRepo, "CRUD operations", "")
+Rel(searchController, searchEngine, "Executes search", "")
+
+Rel(lectureRepo, dbLectures, "Accesses", "SQL")
+Rel(noteRepo, dbNotes, "Accesses", "SQL")
+Rel(fileRepo, dbFiles, "Accesses", "SQL")
+Rel(lectureRepo, redisCache, "Caches results", "")
+Rel(searchEngine, idxSearch, "Uses indexes", "")
+
+Rel(transcriptionService, speechToText, "Sends audio", "REST")
+Rel(summaryService, summarySystem, "Requests summary", "REST")
+
+Rel(fileController, fileManager, "Manages files", "")
+Rel(fileManager, audioStore, "Reads/writes files", "File I/O")
+Rel(fileManager, tempStore, "Handles temp files", "File I/O")
+Rel(fileManager, backupStore, "Archives backups", "File I/O")
+
+Rel(dbLectures, triggerUpdate, "Updates timestamp", "")
+Rel(dbNotes, triggerUpdate, "Updates timestamp", "")
+Rel(dbLectures, idxSearch, "Indexed for search", "")
+Rel(dbUsers, idxUsers, "Indexed for lookup", "")
+
+UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")

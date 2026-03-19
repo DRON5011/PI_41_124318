@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  trivy-scanner:
+    image: aquasec/trivy:latest
+    container_name: trivy-security-scanner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./trivy-reports:/reports
+      - ./trivy-cache:/root/.cache/trivy
+    working_dir: /reports
+    command: 
+      - image
+      - --severity=CRITICAL,HIGH
+      - --format=table
+      - --output=/reports/trivy-report.txt
+      - nocodb/nocodb:latest
+    
+  trivy-json:
+    image: aquasec/trivy:latest
+    container_name: trivy-json-scanner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./trivy-reports:/reports
+      - ./trivy-cache:/root/.cache/trivy
+    working_dir: /reports
+    command: 
+      - image
+      - --severity=CRITICAL,HIGH,MEDIUM
+      - --format=json
+      - --output=/reports/trivy-report.json
+      - nocodb/nocodb:latest
+
+  trivy-fs:
+    image: aquasec/trivy:latest
+    container_name: trivy-fs-scanner
+    volumes:
+      - ./:/project
+      - ./trivy-reports:/reports
+      - ./trivy-cache:/root/.cache/trivy
+    working_dir: /project
+    command: 
+      - fs
+      - --severity=CRITICAL,HIGH
+      - --format=table
+      - --output=/reports/trivy-fs-report.txt
+      - .
