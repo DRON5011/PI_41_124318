@@ -202,6 +202,8 @@
 ![Metaphors](/images/metaphors1.png)
 ## Связи таблицы Metaphors
 ![Metaphors](/images/metaphors2.png)
+# Также был создан график в Dash Plotly для показа графика распределения лекций по дням(в будущем будет больше статистической информации в  виде графиков)
+![Dash](/images/dash.png)
 # Pytest
 ![Pytest](/images/test1.png)
 ![Pytest](/images/test2.png)
